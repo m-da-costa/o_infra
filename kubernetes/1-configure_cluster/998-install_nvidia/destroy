@@ -1,0 +1,10 @@
+#!/bin/bash
+#helm upgrade \
+#    --install \
+#    --namespace=gpu-operator \
+#    --create-namespace \
+#    --wait \
+#    --values=values.yaml\
+#    gpu-operator \
+#    nvidia/gpu-operator
+helm uninstall gpu-operator -n gpu-operator

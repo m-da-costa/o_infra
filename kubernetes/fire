@@ -1,0 +1,9 @@
+#!/bin/bash
+firefox --new-tab baserow.demo.internal.maguscorp.com.br \
+  --new-tab rancher.demo.internal.maguscorp.com.br \
+  --new-tab chatwoot.demo.internal.maguscorp.com.br \
+  --new-tab evolution.demo.internal.maguscorp.com.br \
+  --new-tab longhorn.demo.internal.maguscorp.com.br \
+  --new-tab n8n.demo.internal.maguscorp.com.br \
+  --new-tab ollama.demo.internal.maguscorp.com.br
+

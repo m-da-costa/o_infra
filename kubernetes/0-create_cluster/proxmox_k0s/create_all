@@ -1,0 +1,33 @@
+#!/bin/bash
+SCRIPT_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+cd $SCRIPT_DIR
+echo "$SCRIPT_DIR"
+cd 0-provisioning/
+sh create.sh
+cd ..
+# pshel
+echo "Dando uma dormida para assentar a poeira"
+sleep 20
+cd 1-creating/0-prepare_all/
+sh run.sh
+cd ..
+echo "Dando uma dormida para assentar a poeira"
+sleep 20
+cd 1-lb_hap
+sh run.sh
+cd ..
+cd 2-cluster
+echo "Dando uma dormida para assentar a poeira"
+sleep 20
+sh create_cluster.sh
+cd ..
+# cd 3-prepare_gpu_nodes
+# sh run.sh
+# cat <<EOF | kubectl apply -f -
+# apiVersion: node.k8s.io/v1
+# kind: RuntimeClass
+# metadata:
+#   name: nvidia
+# handler: nvidia
+# EOF
+chmod 0600 ~/.kube/config

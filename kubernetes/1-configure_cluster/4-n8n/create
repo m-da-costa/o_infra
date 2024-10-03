@@ -1,0 +1,7 @@
+#!/bin/bash
+export HELM_EXPERIMENTAL_OCI=1
+# helm pull oci://8gears.container-registry.com/library/n8n
+helm upgrade --install n8n oci://8gears.container-registry.com/library/n8n \
+  --values values.yaml \
+  --namespace n8n \
+  --create-namespace

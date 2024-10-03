@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: baserow
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: baserow
+  namespace: baserow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: baserow
+  template:
+    metadata:
+      labels:
+        app: baserow
+      annotations:
+        kubernetes.io/hostname: <|instance hostname|>
+    spec:
+      containers:
+      - name: baserow
+        image: baserow/baserow:1.27.2
+        env:
+        - name: BASEROW_PUBLIC_URL
+          value: https://baserow.demo.internal.maguscorp.com.br
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        volumeMounts:
+        - name: baserow-config
+          mountPath: /baserow/data
+      volumes:
+      - name: baserow-config
+        persistentVolumeClaim:
+          claimName: baserow-config-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: baserow-config-pvc
+  namespace: baserow
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: baserow-service
+  namespace: baserow
+spec:
+  selector:
+    app: baserow
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  - name: https
+    port: 443
+    targetPort: 443
+  type: NodePort 
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: baserow-ingress
+  namespace: baserow
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-cluster-issuer # ClusterIssuer name
+    kubernetes.io/tls-acme: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - baserow.demo.internal.maguscorp.com.br
+    secretName: baserow-tls
+  rules:
+  - host: baserow.demo.internal.maguscorp.com.br
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: baserow-service
+            port:
+              number: 80
+# ---
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: baserow-config
+# data:
+#   Baserow.properties: |
+#     # settings here

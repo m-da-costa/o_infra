@@ -1,0 +1,42 @@
+# operator:
+#   defaultRuntime: containerd
+
+toolkit:
+  enabled: false
+  # version: v1.16.1-ubuntu20.04
+  env:
+    - name: CONTAINERD_CONFIG
+      value: /etc/k0s/containerd.toml
+    - name: CONTAINERD_SOCKET
+      value: /run/k0s/containerd.sock
+    - name: CONTAINERD_RUNTIME_CLASS
+      value: nvidia
+    - name: CONTAINERD_SET_AS_DEFAULT
+      value: "true"
+
+driver:
+  enabled: false
+  # manager:
+  #   image: k8s-driver-manager
+  #   repository: nvcr.io/nvidia/cloud-native
+  #   # version: v0.6.10
+  #   version: v0.6.10-ubi8
+  #   imagePullPolicy: IfNotPresent
+  #   env:
+  #     - name: ENABLE_AUTO_DRAIN
+  #       value: "true"
+  #     - name: DRAIN_USE_FORCE
+  #       value: "true"
+  #     - name: DRAIN_POD_SELECTOR_LABEL
+  #       value: ""
+  #     - name: DRAIN_TIMEOUT_SECONDS
+  #       value: "0s"
+  #     - name: DRAIN_DELETE_EMPTYDIR_DATA
+  #       value: "true"
+  # repoConfig:
+  #   configMapName: repo-config
+  # version: "535.183.01" # maque sur this version is compatible with your GPU
+
+
+# validator:
+#   version: "v24.6.1" # maque sur this version is compatible with your GPU

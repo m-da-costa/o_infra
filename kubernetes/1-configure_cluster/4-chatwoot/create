@@ -1,0 +1,4 @@
+helm upgrade --install chatwoot chatwoot/chatwoot \
+  --values values.yaml \
+  --namespace chatwoot \
+  --create-namespace

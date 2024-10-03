@@ -1,0 +1,8 @@
+#!/bin/bash
+helm upgrade --install longhorn longhorn/longhorn \
+  --namespace longhorn-system \
+  --create-namespace \
+  --version 1.7.0 \
+  --values ./values.yaml
+USER=admin; PASSWORD=admin; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" > auth
+kubectl -n longhorn-system create secret generic basic-auth --from-file=auth

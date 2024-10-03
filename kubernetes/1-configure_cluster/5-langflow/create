@@ -1,0 +1,6 @@
+#!/bin/bash 
+helm upgrade --install langflow-ide langflow/langflow-ide \
+  -n langflow \
+  --create-namespace \
+  --values ./values.yaml
+# kubectl apply -f ./ingress.yaml

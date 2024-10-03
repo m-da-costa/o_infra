@@ -1,0 +1,84 @@
+apiVersion: k0sctl.k0sproject.io/v1beta1
+kind: Cluster
+metadata:
+  name: k0s-cluster
+spec:
+  hosts:
+  - ssh:
+      address: 192.168.50.100
+      user: magus 
+      port: 22
+      keyPath: /home/magus/.ssh/k3s
+    role: controller
+  - ssh:
+      address: 192.168.50.101
+      user: magus 
+      port: 22
+      keyPath: /home/magus/.ssh/k3s
+    role: controller
+  - ssh:
+      address: 192.168.50.102
+      user: magus 
+      port: 22
+      keyPath: /home/magus/.ssh/k3s
+    role: controller
+  - ssh:
+      address: 192.168.50.150
+      user: magus 
+      port: 22
+      keyPath: /home/magus/.ssh/k3s
+    role: worker
+  - ssh:
+      address: 192.168.50.151
+      user: magus 
+      port: 22
+      keyPath: /home/magus/.ssh/k3s
+    role: worker
+  - ssh:
+      address: 192.168.50.152
+      user: magus 
+      port: 22
+      keyPath: /home/magus/.ssh/k3s
+    role: worker
+  - ssh:
+      address: 192.168.50.153
+      user: magus 
+      port: 22
+      keyPath: /home/magus/.ssh/k3s
+    role: worker
+  - ssh:
+      address: 192.168.50.154
+      user: magus 
+      port: 22
+      keyPath: /home/magus/.ssh/k3s
+    role: worker
+
+  k0s:
+    version: 1.30.3+k0s.0 
+    config:
+      spec:
+        api:
+          externalAddress: 192.168.50.245
+          sans:
+          - 192.168.50.100
+          - 192.168.50.101
+          - 192.168.50.102
+          - 192.168.50.245
+        storage:
+          type: etcd
+        telemetry:
+          enabled: false
+        network:
+          kubeProxy:
+            mode: ipvs
+            ipvs:
+              strictARP: true
+        extensions:
+          helm:
+            repositories:
+            - name: metallb
+              url: https://metallb.github.io/metallb
+            charts:
+            - name: metallb
+              chartname: metallb/metallb
+              namespace: metallb

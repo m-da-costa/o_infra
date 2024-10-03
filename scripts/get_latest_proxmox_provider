@@ -1,0 +1,9 @@
+#!/bin/bash
+mkdir -p $HOME/.terraform.d/plugins/registry.example.com/telmate/proxmox/9.9.9/linux_amd64
+rm -v $HOME/.terraform.d/plugins/registry.example.com/telmate/proxmox/9.9.9/linux_amd64/terraform-provider-proxmox
+git clone https://github.com/Telmate/terraform-provider-proxmox -b master /tmp/proxmox-provider
+cd /tmp/proxmox-provider
+make
+mv bin/terraform-provider-proxmox $HOME/.terraform.d/plugins/registry.example.com/telmate/proxmox/9.9.9/linux_amd64 
+rm -rfv /tmp/proxmox-provider
+ls -la $HOME/.terraform.d/plugins/registry.example.com/telmate/proxmox/9.9.9/linux_amd64

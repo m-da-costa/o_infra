@@ -1,0 +1,295 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: evolutionspace
+
+---
+# ConfigMaps
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: evolution-config
+  namespace: evolutionspace
+data:
+  SERVER_URL: http://localhost:8080
+  CORS_ORIGIN: '*'
+  CORS_METHODS: "POST,GET,PUT,DELETE"
+  CORS_CREDENTIALS: "true"
+
+  # Log settings
+  LOG_LEVEL: ERROR,WARN,DEBUG,INFO,LOG,VERBOSE,DARK,WEBHOOKS
+  LOG_COLOR: "true"
+  LOG_BAILEYS: error
+
+  # Instance cleanup
+  DEL_INSTANCE: "false"
+  DEL_TEMP_INSTANCES: "true"
+
+  # Temporary data storage
+  STORE_MESSAGES: "true"
+  Store_MESSAGE_UP: "true"
+  STORE_CONTACTS: "true"
+  STORE_CHATS: "true"
+
+  # Cleaning intervals
+  CLEAN_STORE_CLEANING_INTERVAL: "7200"
+  CLEAN_STORE_MESSAGES: "true"
+  CLEAN_STORE_MESSAGE_UP: "true"
+  CLEAN_STORE_CONTACTS: "true"
+  CLEAN_STORE_CHATS: "true"
+
+  # Permanent data storage
+  DATABASE_ENABLED: "false"
+  DATABASE_CONNECTION_URI: mongodb://root:root@mongodb:27017/?authSource=admin&readPreference=primary&ssl="false"&directConnection="true"
+  DATABASE_CONNECTION_DB_PREFIX_NAME: evolutiondocker
+
+  # Database save settings
+  DATABASE_SAVE_DATA_INSTANCE: "false"
+  DATABASE_SAVE_DATA_NEW_MESSAGE: "false"
+  DATABASE_SAVE_MESSAGE_UPDATE: "false"
+  DATABASE_SAVE_DATA_CONTACTS: "false"
+  DATABASE_SAVE_DATA_CHATS: "false"
+
+  # RabbitMQ settings
+  RABBITMQ_ENABLED: "false"
+  RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
+  RABBITMQ_EXCHANGE_NAME: evolution_exchange
+  RABBITMQ_GLOBAL_ENABLED: "false"
+  RABBITMQ_EVENTS_APPLICATION_STARTUP: "false"
+  RABBITMQ_EVENTS_QRCODE_UPDATED: "true"
+  RABBITMQ_EVENTS_MESSAGES_SET: "true"
+  RABBITMQ_EVENTS_LABELS_ASSOCIATION: "true"
+
+  # Chatwoot settings
+  CHATWOOT_MESSAGE_DELETE: "false"
+  CHATWOOT_MESSAGE_READ: "false"
+  CHATWOOT_IMPORT_DATABASE_CONNECTION_URI: "postgres://user:password@hostname:port/dbname?sslmode=disable"
+
+  # Cache settings
+  CACHE_REDIS_ENABLED: "false"
+  CACHE_REDIS_URI: redis://redis:6379
+  CACHE_REDIS_PREFIX_KEY: evolution
+  CACHE_REDIS_TTL: "604800"
+  CACHE_LOCAL_ENABLED: "false"
+  CACHE_LOCAL_TTL: "604800"
+
+  # Authentication type and key
+  AUTHENTICATION_TYPE: apikey
+  AUTHENTICATION_API_KEY: B6D711FCDE4D4FD5936544120E713976
+
+  # JWT settings
+  AUTHENTICATION_JWT_EXPIRIN_IN: "0"
+  AUTHENTICATION_JWT_SECRET: 'L=0YWt]b2w[WF>#>:&E'
+---
+# ConfigMaps (Ingress Controller)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+# className: "nginx"
+metadata:
+  name: eviction-dev-inlinegress
+  namespace: evolutionspace
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-cluster-issuer # ClusterIssuer name
+    kubernetes.io/tls-acme: 'true'
+
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: evolution.demo.internal.maguscorp.com.br
+      http:
+        paths:
+          - pathType: Prefix
+            path: '/'
+            backend:
+              service:
+                name: evolution-api
+                port:
+                  number: 8080
+  tls:
+  - hosts:
+    -  evolution.demo.internal.maguscorp.com.br
+    secretName: tls-secret-evolution
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evolution-api
+  namespace: evolutionspace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evolution-api
+  template:
+    metadata:
+      labels:
+        app: evolution-api
+    spec:
+      containers:
+        - name: evolution-api
+          image: atendai/evolution-api:latest
+          ports:
+            - containerPort: 8080
+
+---
+# Services for api and other se---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evolution-api-mongo-server
+  namespace: evolutionspace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evolution-api-mongo-server
+  template:
+    metadata:
+      labels:
+        app: evolution-api-mongo-server
+    spec:
+      containers:
+        - name: evolution-api-mongo-server
+          image: mongo
+          volumeMounts:
+            - name: evolution-mongodb-data-pvc
+              mountPath: /data/db
+            - name: evolution-mongodb-configdb-pvc
+              mountPath: /config
+      volumes:
+      - name: evolution-mongodb-data-pvc
+        persistentVolumeClaim:
+          claimName: evolution-mongodb-data-pvc
+      - name: evolution-mongodb-configdb-pvc
+        persistentVolumeClaim:
+          claimName: evolution-mongodb-configdb-pvc
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evolution-redis-server
+  namespace: evolutionspace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evolution-redis-server
+  template:
+    metadata:
+      labels:
+        app: evolution-redis-server
+    spec:
+      containers:
+        - name: evolution-redis-server
+          image: redis
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: evolution-redis-data-pvc
+              mountPath: /data
+            - name: evolution-redis-configdb-pvc
+              mountPath: /configrvices
+      volumes:
+      - name: evolution-redis-data-pvc
+        persistentVolumeClaim:
+          claimName: evolution-redis-data-pvc
+      - name: evolution-redis-configdb-pvc
+        persistentVolumeClaim:
+          claimName: evolution-redis-configdb-pvc
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: evolution-api
+  namespace: evolutionspace
+spec:
+  type: NodePort
+  selector:
+    app: evolution-api
+  ports:
+    - port: 8080
+      targetPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: evolution-mongo-server
+  namespace: evolutionspace
+spec:
+  type: ClusterIP
+  ports:
+    - port: 27017
+      targetPort: 27017
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: evolution-redis-server
+  namespace: evolutionspace
+spec:
+  type: NodePort
+  selector:
+    app: evolution-redis-server
+  ports:
+    - port: 6379
+      targetPort: 6379
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: evolution-mongodb-data-pvc
+  namespace: evolutionspace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+# Persistent Volumes Claims
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: evolution-mongodb-configdb-pvc
+  namespace: evolutionspace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+# Persistent Volumes Claims
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: evolution-redis-data-pvc
+  namespace: evolutionspace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+# Persistent Volumes Claims
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: evolution-redis-configdb-pvc
+  namespace: evolutionspace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---

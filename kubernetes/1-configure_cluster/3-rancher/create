@@ -1,0 +1,8 @@
+#!/bin/bash
+helm upgrade --install rancher rancher-stable/rancher \
+  --namespace cattle-system \
+  --create-namespace \
+  --set bootstrapPassword=admin \
+  --values values.yaml
+kubectl apply -f ./ingress.yaml
+

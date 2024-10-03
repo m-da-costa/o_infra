@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "o_infra"
+version = "0.0.1"
+description = ""
+authors = ["Ricardo da Costa <costa@maguscorp.com.br>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+ansible = "^10.3.0"
+proxmoxer = "^2.1.0"
+openssh-wrapper = "^0.4"
+paramiko = "^3.4.1"
+requests = "^2.32.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

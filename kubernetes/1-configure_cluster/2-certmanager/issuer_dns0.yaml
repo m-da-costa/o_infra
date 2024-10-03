@@ -1,0 +1,21 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: cloudflare-cluster-issuer 
+spec:
+  acme:
+    email: <|email|>
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      # Secret resource that will be used to store the account's private key.
+      name: letsencrypt-cloudflare-prod
+    solvers:
+    - dns01:
+        cloudflare:
+          email: <|email|> 
+          apiTokenSecretRef:
+            name: cloudflare-secret
+            key: api-key
+      selector:
+        dnsZones:
+        - '*.demo.internal.maguscorp.com.br'

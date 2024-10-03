@@ -1,0 +1,23 @@
+#!/bin/bash
+# This script is path dependent!
+SCRIPT_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+cd $SCRIPT_DIR
+echo "$SCRIPT_DIR"
+NAME='k3s'
+rm -rfv ../ssh_keys
+mkdir ../ssh_keys
+ssh-keygen -f ../ssh_keys/$NAME -N ""
+# Not working, no time to fix rn
+# terraform_path='../kubernetes/0-create_cluster/proxmox_k0s/0-provisioning/terraform.tfvars'
+# terraform_contents=$(cat $terraform_path)
+# echo $terraform_contents
+#
+# # Check if the marker <|ssh_keys|> exists in the contents of the file
+# if echo "$terraform_contents" | grep -q "<|ssh_keys|>"; then
+#
+#   # Get the contents of $NAME.pub
+#   ssh_pub=$(cat ../ssh_keys/$NAME.pub)
+#
+#   # Update the terraform file with the new SSH keys
+#   sed -i "s|<\|ssh_keys||g; s|$ssh_pub||" $terraform_path
+# fi

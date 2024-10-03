@@ -1,0 +1,5 @@
+**/**.log
+**/**.terraform
+**/**.terraform*
+**/**.backup
+**/**__pycache__

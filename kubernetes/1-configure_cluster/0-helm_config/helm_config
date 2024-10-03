@@ -1,0 +1,14 @@
+#!/bin/bash
+export HELM_EXPERIMENTAL_OCI=1
+helm repo add longhorn https://charts.longhorn.io
+helm repo add jenkinsci https://charts.jenkins.io
+helm repo add traefik https://traefik.github.io/charts
+helm repo add nginx https://kubernetes.github.io/ingress-nginx
+helm repo add jetstack https://charts.jetstack.io --force-update
+# helm repo add nvidia https://nvidia.github.io/gpu-operator
+helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+helm repo add 8gears oci://8gears.container-registry.com/library/n8n
+helm repo add community https://community-charts.github.io/helm-charts
+helm repo add chatwoot https://chatwoot.github.io/charts
+helm repo add langflow https://langflow-ai.github.io/langflow-helm-charts
+helm repo update

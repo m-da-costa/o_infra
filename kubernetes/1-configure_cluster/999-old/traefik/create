@@ -1,0 +1,3 @@
+#!/bin/bash
+
+helm upgrade --install --namespace=traefik-v2 --create-namespace --values values.yaml traefik traefik/traefik

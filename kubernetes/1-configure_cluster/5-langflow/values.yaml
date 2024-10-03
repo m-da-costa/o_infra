@@ -1,0 +1,223 @@
+imagePullSecrets: []
+
+nameOverride: "langflow"
+# Override for the name of the helm deployment
+fullnameOverride: "langflow"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+ingress:
+  enabled: false
+  annotations: 
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: cloudflare-cluster-issuer 
+    kubernetes.io/ingress.class: nginx
+  ingressClassName: nginx
+  className: nginx
+  hosts:
+    - host: langflow.demo.internal.maguscorp.com.br
+      # paths: []
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: langflow
+              port:
+                number: 7860
+  tls:
+   - secretName: chart-langflow-tls
+     hosts:
+       - langflow.demo.internal.maguscorp.com.br
+
+langflow:
+  global:
+    image:
+      pullPolicy: IfNotPresent
+      tag: ""
+  backend:
+    replicaCount: 1
+    service:
+      type: ClusterIP
+      port: 7860
+    backendOnly: true
+    numWorkers: 1
+    image:
+      repository: langflowai/langflow-backend
+      pullPolicy: IfNotPresent
+      tag: ""
+    resources:
+      requests:
+        cpu: 0.5
+        memory: 1Gi
+      # limits:
+      #   cpu: 0.5
+      #   memory: 1Gi
+    probe:
+      failureThreshold: 3
+      periodSeconds: 10
+      timeoutSeconds: 5
+      initialDelaySeconds: 5
+    env: []
+    nodeSelector: {}
+
+
+    tolerations: []
+
+    affinity: {}
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "9090"
+      prometheus.io/path: "/metrics"
+
+    securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+    podSecurityContext: {}
+
+    externalDatabase:
+      # Compose in the SQLAlchemy format: https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls
+      enabled: true
+      driver:
+        value: "postgresql"
+      host:
+        value: "langflow-ide-postgresql-service"
+      port:
+        value: "5432"
+      database:
+        value: "langflow-db"
+      user:
+        value: "langflow"
+      password:
+        valueFrom:
+          secretKeyRef:
+            key: "password"
+            name: "langflow-ide-postgresql-service"
+    sqlite:
+      enabled: false
+
+
+# langflow:
+#   backend:
+#     externalDatabase:
+#       enabled: true
+#       driver:
+#         value: "postgresql"
+#       host:
+#         value: "langflow-ide-postgresql-service"
+#       port:
+#         value: "5432"
+#       database:
+#         value: "langflow-db"
+#       user:
+#         value: "langflow"
+#       password:
+#         valueFrom:
+#           secretKeyRef:
+#             key: "password"
+#             name: "langflow-ide-postgresql-service"
+#     sqlite:
+#       enabled: false
+    # sqlite:
+    #   enabled: true
+    #   volume:
+    #     size: "1Gi"
+    #     existingStorageClassName: "default"
+        # If you want the chart to create storage classes, then don't set
+        # existingStorageClassName name and provide configuration values
+        # for the storage class. The settings vary based on cloud
+        # provider. Below are examples for AWS, GCP, and Azure.
+
+        # For AWS
+        # storageClass:
+        #  provisioner: kubernetes.io/aws-ebs
+        #  type: gp2
+        #  fsType: ext4
+        #  extraParams:
+        #     iopsPerGB: "10"
+
+        # For GCP
+        # storageClass:
+        #   provisioner: kubernetes.io/gce-pd
+        #   type: pd-ssd
+        #   fsType: ext4
+        #   extraParams:
+        #      replication-type: none
+
+        # For Azure
+        # storageClass:
+        #   provisioner: kubernetes.io/azure-disk
+        #   fsType: ext4
+        #   type: managed-premium
+        #   extraParams:
+        #     storageaccounttype: Premium_LRS
+        #     kind: Managed
+        #     cachingmode: ReadOnly
+        # storageClass: {}
+
+    # autoLogin: true|false
+    # superuser: <superuser login>
+    # superuserPassword: <superuser password>
+    # secretKey: <encryption key, optional>
+    # newUserIsActive: true|false
+    
+  frontend:
+    enabled: true
+    replicaCount: 1
+    service:
+      type: ClusterIP
+      port: 8080
+    image:
+      repository: langflowai/langflow-frontend
+      pullPolicy: IfNotPresent
+      tag: ""
+    resources:
+      requests:
+        cpu: 0.3
+        memory: 512Mi
+      # limits:
+      #   cpu: 0.3
+      #   memory: 512Mi
+    probe:
+      failureThreshold: 3
+      periodSeconds: 10
+      timeoutSeconds: 5
+      initialDelaySeconds: 5
+    nodeSelector: {}
+
+    tolerations: []
+
+    affinity: {}
+    podAnnotations: {}
+    podSecurityContext: {}
+    securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+secretProvider:
+  enabled: false
+
+# Deploy postgresql. You can skip this section if you have an existing postgresql database.
+postgresql:
+  enabled: true
+  fullnameOverride: "langflow-ide-postgresql-service"
+  auth:
+    username: "langflow"
+    password: "langflow-postgres"
+    database: "langflow-db"
