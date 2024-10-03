@@ -14,15 +14,24 @@ Install all dependencies:
 poetry install
 ```
 
-Now only the Proxmox k0s routine was tested.\n
-For proxmox follow the steps:\n
-Prepare Proxmox\n
-[Preparing Proxmox](docs/preparing_proxmox.md)\n
-Prepare variables (terraform + ansible):\n
-[Preparing to Deploy k0s](docs/preparing_variables_for_k0s.md)\n
-Prepare to deploy apps:\n
-[Preparing apps](docs/preparing_variables_apps.md)\n
-After that run:\n
+Now only the Proxmox k0s routine was tested.
+
+For proxmox follow the steps:
+
+Prepare Proxmox
+
+[Preparing Proxmox](docs/preparing_proxmox.md)
+
+Prepare variables (terraform + ansible):
+
+[Preparing to Deploy k0s](docs/preparing_variables_for_k0s.md)
+
+Prepare to deploy apps:
+
+[Preparing apps](docs/preparing_variables_apps.md)
+
+After that run:
+
 
 ```bash
 sh kubernetes/create_all
