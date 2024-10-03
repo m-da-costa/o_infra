@@ -4,7 +4,7 @@
 
 Be a repo that agregate documents and types of deployments for multiple public clouds and bare metal hosting.
 
-## How to run for now:
+## How to run:
 First activate the environment:
 ```bash
 poetry shell
